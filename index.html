@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arrow Chrono</title>
+<meta name="description" content="Acoustic archery chronograph. Measures arrow speed from the sound of the shot and the sound of the impact.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#151515">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#151515;
+  --surface:#1f1f1f;
+  --line:#3a3a3a;
+  --ink:#f0f0f0;
+  --ink-2:#a8a8a8;
+  --live:#5fd694;
+  --live-bg:#173224;
+  --warn:#f08a70;
+  --warn-bg:#3a1e18;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --z-toast:40;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.5;
+  padding:0 max(1rem,env(safe-area-inset-left)) calc(2rem + env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color:transparent;
+}
+main{max-width:32rem;margin:0 auto}
+
+header{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+  padding:1.25rem 0 1rem;border-bottom:1px solid var(--line)}
+h1{font-size:1rem;font-weight:650;letter-spacing:-0.01em;margin:0}
+h1 span{color:var(--ink-2);font-weight:450}
+
+.status{font-family:var(--mono);font-size:.75rem;font-weight:600;
+  padding:.25rem .5rem;border-radius:.3rem;background:var(--surface);color:var(--ink-2);
+  transition:background .25s var(--ease),color .25s var(--ease);white-space:nowrap}
+.status[data-s="listening"],.status[data-s="flight"]{background:var(--live-bg);color:var(--live)}
+.status[data-s="error"]{background:var(--warn-bg);color:var(--warn)}
+
+/* ---- LCD instrument panel ---- */
+.panel{
+  --lcd:#000000;
+  --lcd-ink:#e8e8e8;
+  --lcd-dim:#9a9a9a;
+  --lcd-line:#2e2e2e;
+  --lcd-live:#5fd694;
+  background:var(--lcd);color:var(--lcd-ink);
+  border-radius:.75rem;padding:.75rem 1rem 1rem;margin:1.25rem 0 .875rem;
+  box-shadow:inset 0 0 0 1px #3a3a3a;
+}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  font-family:var(--mono);font-size:.6875rem;font-weight:600;letter-spacing:.04em;
+  color:var(--lcd-dim);padding-bottom:.5rem}
+.pmode{color:var(--lcd-ink);letter-spacing:.08em}
+.plive{min-width:2.5rem;text-align:right}
+.plive[data-live="1"]{color:var(--lcd-live)}
+.plive[data-live="1"]::before{content:"";display:inline-block;width:.4rem;height:.4rem;
+  border-radius:50%;background:var(--lcd-live);margin-right:.3rem;vertical-align:.05rem;
+  animation:pulse 1.6s var(--ease) infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+.segs{display:flex;gap:2px;align-items:flex-end;height:.6rem}
+.segs i{width:.2rem;background:var(--lcd-line);border-radius:1px;transition:background .08s linear}
+.segs i:nth-child(1){height:35%}
+.segs i:nth-child(2){height:50%}
+.segs i:nth-child(3){height:65%}
+.segs i:nth-child(4){height:82%}
+.segs i:nth-child(5){height:100%}
+.segs i.on{background:var(--lcd-ink)}
+.segs i.hot{background:var(--lcd-live)}
+
+.pshots{text-align:center;margin:0;font-family:var(--mono);font-size:.75rem;font-weight:600;
+  letter-spacing:.09em;color:var(--lcd-dim)}
+
+.big{display:flex;align-items:center;justify-content:center;gap:.4rem;margin:.125rem 0 .5rem}
+.speed{font-family:var(--sans);font-weight:700;font-variant-numeric:tabular-nums;
+  font-size:clamp(3.5rem,19vw,4.75rem);line-height:1;letter-spacing:-0.045em;
+  transition:opacity .2s var(--ease)}
+.speed.idle{color:#3a3a3a}
+.u{display:flex;flex-direction:column;justify-content:center;gap:.14em;
+  font-family:var(--sans);font-size:.9375rem;font-weight:700;letter-spacing:.02em;
+  color:var(--lcd-dim);line-height:1}
+
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem;
+  border-top:1px solid var(--lcd-line);padding-top:.625rem;text-align:center}
+.pstats div{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.pstats .l{font-family:var(--mono);font-size:.625rem;font-weight:600;letter-spacing:.08em;
+  color:var(--lcd-dim)}
+.pstats .v{font-family:var(--sans);font-size:1.375rem;font-weight:650;
+  font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1.15}
+.pstats .uu{font-family:var(--mono);font-size:.625rem;font-weight:600;letter-spacing:.06em;
+  color:var(--lcd-dim)}
+
+.sub{font-family:var(--mono);font-size:.8125rem;color:var(--ink-2);margin:0;
+  min-height:1.25rem;text-align:center}
+.sub b{color:var(--ink);font-weight:600}
+.alts{display:flex;flex-wrap:wrap;gap:.375rem;justify-content:center;margin-top:.625rem}
+.alts button{font-family:var(--mono);font-size:.75rem;padding:.25rem .5rem;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:.3rem;cursor:pointer}
+.alts button:hover{border-color:var(--ink-2);color:var(--ink)}
+
+/* ---- meter ---- */
+.meter{position:relative;height:.5rem;background:#2b2b2b;border-radius:.25rem;
+  overflow:hidden;margin:1rem 0 .5rem}
+.meter i{position:absolute;inset:0 auto 0 0;width:0;background:var(--ink-2);
+  border-radius:.25rem;transition:width .06s linear}
+.meter i.hot{background:var(--live)}
+.meter u{position:absolute;top:-.25rem;bottom:-.25rem;width:2px;background:var(--warn);
+  border-radius:1px;left:0;transition:left .3s var(--ease)}
+.meter-cap{display:flex;justify-content:space-between;font-family:var(--mono);
+  font-size:.6875rem;color:var(--ink-2)}
+
+/* ---- controls ---- */
+.go{width:100%;padding:1.125rem;border:0;border-radius:.625rem;
+  font-family:var(--sans);font-size:1.0625rem;font-weight:650;letter-spacing:-0.01em;
+  background:var(--ink);color:var(--bg);cursor:pointer;margin-top:1rem;
+  transition:transform .15s var(--ease),background .2s var(--ease)}
+.go:active{transform:scale(.985)}
+.go.on{background:var(--live)}
+
+/* ---- sections ---- */
+section{border-top:1px solid var(--line);padding:1.25rem 0}
+h2{font-size:.875rem;font-weight:650;margin:0 0 1rem}
+.grid{display:grid;gap:.875rem 1rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))}
+label{display:block;font-size:.8125rem;color:var(--ink-2);margin-bottom:.3rem}
+input,select{width:100%;font-family:var(--mono);font-size:1rem;padding:.5rem .625rem;
+  border:1px solid var(--line);border-radius:.375rem;background:var(--surface);color:var(--ink)}
+input:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:1px;border-color:var(--ink)}
+.seg{display:flex;border:1px solid var(--line);border-radius:.375rem;overflow:hidden}
+.seg button{flex:1;padding:.5rem .25rem;border:0;background:var(--surface);color:var(--ink-2);
+  font-family:var(--sans);font-size:.8125rem;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+.hint{font-size:.75rem;color:var(--ink-2);margin:.5rem 0 0}
+.row{display:flex;gap:.5rem;align-items:center;margin-top:1rem}
+.ghost{padding:.5rem .75rem;border:1px solid var(--line);border-radius:.375rem;
+  background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:.8125rem;cursor:pointer}
+.ghost:hover{border-color:var(--ink-2)}
+
+/* ---- shots ---- */
+ol{list-style:none;margin:0;padding:0}
+ol li{display:flex;align-items:baseline;gap:.75rem;font-family:var(--mono);font-size:.875rem;
+  padding:.5rem 0;border-bottom:1px solid var(--line)}
+ol li:last-child{border-bottom:0}
+ol .idx{color:var(--ink-2);font-size:.75rem;min-width:1.75rem}
+ol .v{font-weight:600;font-variant-numeric:tabular-nums}
+ol .d{color:var(--ink-2);font-size:.75rem;margin-left:auto;text-align:right}
+ol .x{border:0;background:none;color:var(--ink-2);cursor:pointer;font-size:1rem;padding:0 .25rem}
+ol .x:hover{color:var(--warn)}
+.empty{color:var(--ink-2);font-size:.8125rem;margin:0}
+
+details summary{font-size:.875rem;font-weight:650;cursor:pointer;list-style:revert}
+.log{font-family:var(--mono);font-size:.6875rem;color:var(--ink-2);white-space:pre-wrap;
+  margin-top:.75rem;max-height:12rem;overflow:auto}
+
+.toast{position:fixed;left:50%;bottom:1.5rem;transform:translate(-50%,1rem);
+  background:var(--ink);color:var(--bg);font-size:.8125rem;padding:.625rem .875rem;
+  border-radius:.5rem;opacity:0;pointer-events:none;z-index:var(--z-toast);
+  transition:opacity .25s var(--ease),transform .25s var(--ease);max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.toast.bar{display:flex;align-items:center;gap:.75rem;padding:.5rem .5rem .5rem .875rem}
+.toast.bar button{font-family:var(--sans);font-size:.8125rem;font-weight:600;
+  border:0;border-radius:.375rem;padding:.4rem .7rem;background:var(--bg);color:var(--ink);cursor:pointer}
+.toast.bar button:active{transform:scale(.97)}
+.toast.bar #updateDismiss{background:none;color:var(--bg);opacity:.6;font-size:1.125rem;
+  font-weight:400;padding:.2rem .4rem}
+.toast.bar #updateDismiss:hover{opacity:1}
+.toast.bar.show{pointer-events:auto}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Arrow Chrono <span>acoustic</span></h1>
+    <div class="status" id="status" data-s="off" role="status">OFF</div>
+  </header>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="segs" id="segs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="pmode" id="panelMode">18 M</span>
+      <span class="plive" id="panelLive">OFF</span>
+    </div>
+
+    <p class="pshots">SHOTS: <span id="panelCount">0</span></p>
+
+    <div class="big">
+      <span class="speed idle" id="speed">—</span>
+      <span class="u" id="unit"></span>
+    </div>
+
+    <div class="pstats">
+      <div><span class="l">AVG</span><span class="v" id="pAvg">—</span><span class="uu" data-u></span></div>
+      <div><span class="l">STD DEV</span><span class="v" id="pSd">—</span><span class="uu" data-u></span></div>
+      <div><span class="l">MAX</span><span class="v" id="pMax">—</span><span class="uu" data-u></span></div>
+    </div>
+  </div>
+
+  <p class="sub" id="detail">Set your distance, then start listening.</p>
+  <div class="alts" id="alts"></div>
+
+  <div class="meter" aria-hidden="true"><i id="bar"></i><u id="thr"></u></div>
+  <div class="meter-cap"><span id="lvl">—</span><span id="floorTxt"></span></div>
+
+  <button class="go" id="go">Start listening</button>
+
+  <section>
+    <h2>Setup</h2>
+    <div class="grid">
+      <div>
+        <label for="dist">Distance to target</label>
+        <input id="dist" type="number" inputmode="decimal" step="0.1" min="1" value="18">
+      </div>
+      <div>
+        <label for="dunit">Distance unit</label>
+        <select id="dunit"><option value="m">metres</option><option value="yd">yards</option></select>
+      </div>
+    </div>
+
+    <div style="margin-top:.875rem">
+      <label>Phone position</label>
+      <div class="seg" id="micseg">
+        <button type="button" data-mic="0" aria-pressed="true">At the bow</button>
+        <button type="button" data-mic="half">Midway</button>
+        <button type="button" data-mic="custom">Custom</button>
+      </div>
+      <p class="hint" id="michint">Sound has to travel back from the target, so the reading depends on air temperature.</p>
+    </div>
+
+    <div class="grid" id="customwrap" hidden style="margin-top:.875rem">
+      <div>
+        <label for="micd">Phone distance from the bow</label>
+        <input id="micd" type="number" inputmode="decimal" step="0.1" min="0" value="9">
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:.875rem">
+      <div>
+        <label for="temp">Air temperature (°C)</label>
+        <input id="temp" type="number" inputmode="decimal" step="1" value="15">
+      </div>
+      <div>
+        <label for="wind">Wind along the shot (m/s)</label>
+        <input id="wind" type="number" inputmode="decimal" step="0.5" value="0">
+      </div>
+    </div>
+    <p class="hint">Positive wind blows from you toward the target. Temperature stops affecting the result entirely once the phone sits exactly midway; wind still has a small effect.</p>
+  </section>
+
+  <section>
+    <h2>Shot log <span id="count" style="color:var(--ink-2);font-weight:450"></span></h2>
+    <ol id="list"></ol>
+    <p class="empty" id="emptyMsg">No shots recorded yet.</p>
+    <div class="row">
+      <button class="ghost" id="csv">Export CSV</button>
+      <button class="ghost" id="clear">Clear</button>
+    </div>
+  </section>
+
+  <section>
+    <details>
+      <summary>Advanced</summary>
+      <div class="grid" style="margin-top:1rem">
+        <div>
+          <label for="sunit">Speed unit</label>
+          <select id="sunit"><option value="fps">ft/s</option><option value="ms">m/s</option><option value="mph">mph</option></select>
+        </div>
+        <div>
+          <label for="weight">Arrow weight (grains)</label>
+          <input id="weight" type="number" inputmode="decimal" step="1" min="0" value="0">
+        </div>
+        <div>
+          <label for="vmin">Slowest plausible (m/s)</label>
+          <input id="vmin" type="number" inputmode="decimal" step="1" value="30">
+        </div>
+        <div>
+          <label for="vmax">Fastest plausible (m/s)</label>
+          <input id="vmax" type="number" inputmode="decimal" step="1" value="200">
+        </div>
+        <div>
+          <label for="ratio">Trigger sensitivity (× noise floor)</label>
+          <input id="ratio" type="number" inputmode="decimal" step="0.5" min="1.5" value="8">
+        </div>
+        <div>
+          <label for="hp">High-pass filter (Hz)</label>
+          <input id="hp" type="number" inputmode="numeric" step="50" min="100" value="750">
+        </div>
+        <div>
+          <label for="offset">Timing offset (ms)</label>
+          <input id="offset" type="number" inputmode="decimal" step="0.5" value="0">
+        </div>
+        <div>
+          <label for="drag">Arrow drag k (per m)</label>
+          <input id="drag" type="number" inputmode="decimal" step="0.0005" min="0" value="0">
+        </div>
+      </div>
+      <p class="hint">Timing offset is subtracted from the measured interval — use it to trim a systematic bias against a known-good chronograph. Drag k above 0 also reports an estimated launch speed; 0.0045 ≈ 1.2&nbsp;ft/s lost per yard.</p>
+      <div class="log" id="log"></div>
+    </details>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<div class="toast bar" id="update" role="alert">
+  <span id="updateMsg">New version ready</span>
+  <button id="updateBtn">Reload</button>
+  <button id="updateDismiss" aria-label="Dismiss">×</button>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
