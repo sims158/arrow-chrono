@@ -30,6 +30,7 @@
   --z-toast:40;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
@@ -247,7 +248,7 @@ details summary{font-size:.875rem;font-weight:650;cursor:pointer;list-style:reve
 
     <div class="grid" id="customwrap" hidden style="margin-top:.875rem">
       <div>
-        <label for="micd">Phone distance from the bow</label>
+        <label for="micd">Phone distance from the bow <span id="micdUnit"></span></label>
         <input id="micd" type="number" inputmode="decimal" step="0.1" min="0" value="9">
       </div>
     </div>

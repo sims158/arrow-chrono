@@ -24,7 +24,7 @@ const el = {};
  'micseg','michint','customwrap','micd','temp','wind','count','stats','list','emptyMsg',
  'csv','clear','sunit','weight','vmin','vmax','ratio','hp','offset','drag','log','toast',
  'update','updateMsg','updateBtn','updateDismiss',
- 'segs','panelMode','panelLive','panelCount','pAvg','pSd','pMax']
+ 'segs','panelMode','panelLive','panelCount','pAvg','pSd','pMax','micdUnit']
   .forEach(k => el[k] = $(k));
 
 const M_PER_YD = 0.9144, FPS = 3.280839895, MPH = 2.2369362920544;
@@ -274,6 +274,11 @@ function render() {
     `${Number.isInteger(dv) ? dv : dv.toFixed(1)} ${el.dunit.value === 'yd' ? 'YD' : 'M'}`;
   el.panelCount.textContent = shots.length;
 
+  const uLabel = el.dunit.value === 'yd' ? 'yd' : 'm';
+  el.micdUnit.textContent = `(${uLabel})`;
+  el.michint.textContent =
+    `${MIC_HINT[micMode]} Correction: ${(c.correction * 1000).toFixed(1)} ms.`;
+
   if (!last) {
     el.speed.textContent = '—';
     el.speed.classList.add('idle');
@@ -389,17 +394,26 @@ function toast(msg) {
 
 el.go.onclick = () => (mode === 'off' ? start() : stop());
 
+const MIC_HINT = {
+  '0':      'Simplest setup. Sound travels back from the target, so temperature matters.',
+  'half':   'Best accuracy: the two sound paths cancel, so temperature stops mattering.',
+  'custom': 'Where the phone actually sits, measured from the bow toward the target.'
+};
+
 el.micseg.onclick = (e) => {
   const b = e.target.closest('button');
   if (!b) return;
   micMode = b.dataset.mic;
   [...el.micseg.children].forEach(c => c.setAttribute('aria-pressed', String(c === b)));
   el.customwrap.hidden = micMode !== 'custom';
-  el.michint.textContent = micMode === 'half'
-    ? 'Best accuracy: the two sound paths cancel, so temperature stops mattering.'
-    : micMode === '0'
-      ? 'Simplest setup. Sound has to travel back from the target, so temperature matters.'
-      : 'Measure the phone-to-bow distance in the same unit as the target distance.';
+
+  // Seed a sensible starting value rather than leaving a stale number that
+  // might sit beyond the target.
+  if (micMode === 'custom') {
+    const D = parseFloat(el.dist.value) || 0;
+    const cur = parseFloat(el.micd.value);
+    if (!Number.isFinite(cur) || cur <= 0 || cur > D) el.micd.value = (D / 2).toFixed(1);
+  }
   render(); saveSettings();
 };
 
