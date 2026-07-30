@@ -5,7 +5,7 @@
  * That way a reload never happens underneath someone mid-session; the page
  * shows a prompt and the user decides.
  */
-const CACHE = 'arrow-chrono-v7';
+const CACHE = 'arrow-chrono-v8';
 const ASSETS = [
   './', './index.html', './app.js', './worklet.js',
   './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'
