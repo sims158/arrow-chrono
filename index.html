@@ -36,7 +36,7 @@ html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
   font-size:16px;line-height:1.5;
-  padding:0 max(1rem,env(safe-area-inset-left)) calc(2rem + env(safe-area-inset-bottom));
+  padding:calc(env(safe-area-inset-top) + .5rem) max(1rem,env(safe-area-inset-left)) calc(2rem + env(safe-area-inset-bottom));
   -webkit-tap-highlight-color:transparent;
 }
 main{max-width:32rem;margin:0 auto}

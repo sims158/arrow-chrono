@@ -27,6 +27,15 @@ class OnsetProcessor extends AudioWorkletProcessor {
     this.absMin = 0.004;   // ...but never below this absolute level
     this.holdN = Math.round(0.03 * this.sr);
 
+    // After an event the detector will not re-arm until the envelope has
+    // fallen back below releaseFrac x threshold. Without this, a sound that
+    // stays loud for longer than the hold re-triggers over and over at exactly
+    // the hold interval, and those repeats can mask the real next event.
+    this.releaseFrac = 0.5;
+    this.waitRelease = false;
+    this.waitN = 0;
+    this.waitMaxN = Math.round(0.5 * this.sr);   // safety cap
+
     this.meterN = Math.round(0.05 * this.sr);
     this.meterCount = this.meterN;
     this.meterPeak = 0;
@@ -39,7 +48,11 @@ class OnsetProcessor extends AudioWorkletProcessor {
       if (d.absMin != null) this.absMin = d.absMin;
       if (d.holdMs != null) this.holdN = Math.round((d.holdMs / 1000) * this.sr);
       if (d.hpHz != null) this.setHighpass(d.hpHz);
-      if (d.reset) { this.env = 0; this.floor = 1e-4; this.hold = 0; this.pending = null; }
+      if (d.releaseFrac != null) this.releaseFrac = d.releaseFrac;
+      if (d.reset) {
+        this.env = 0; this.floor = 1e-4; this.hold = 0;
+        this.pending = null; this.waitRelease = false;
+      }
     };
   }
 
@@ -82,7 +95,14 @@ class OnsetProcessor extends AudioWorkletProcessor {
             t: 'onset', sample: this.pending, peak: this.peak, floor: this.floor
           });
           this.pending = null;
+          this.waitRelease = true;      // gate closed until the sound decays
+          this.waitN = 0;
         }
+      } else if (this.waitRelease) {
+        // Hold the noise floor still while a loud event rings out, otherwise
+        // the decay tail drags the floor up and desensitises the detector.
+        const rel = Math.max(this.floor * this.ratio, this.absMin) * this.releaseFrac;
+        if (this.env < rel || ++this.waitN > this.waitMaxN) this.waitRelease = false;
       } else {
         const d = this.env - this.floor;
         this.floor += d > 0 ? d * this.floorUp : d * this.floorDn;
