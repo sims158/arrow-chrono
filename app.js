@@ -214,7 +214,7 @@ function resolve() {
   // a midway-mounted phone also makes a noise, so pick by level, not by order.
   let best = valid[0];
   for (const v of valid) if (v.peak > best.peak) best = v;
-  const ok = addShot(best.dt, valid);
+  const ok = addShot(best.dt, valid, candidates);
 
   if (ok) {
     stop();                       // one shot per arm: release the mic
@@ -242,14 +242,18 @@ function solve(dt, c) {
   return { T, vAvg, v0, vImpact };
 }
 
-function addShot(dt, alts) {
+function addShot(dt, alts, all) {
   const c = cfg();
   const r = solve(dt, c);
   if (!r) {
     el.detail.textContent = 'Interval too short to be real — check the distance setting.';
     return false;
   }
-  shots.push({ dt, t: Date.now(), alts: alts.map(a => a.dt) });
+  shots.push({
+    dt, t: Date.now(),
+    alts: alts.map(a => a.dt),
+    cands: (all || []).map(x => ({ d: x.dt, p: x.peak }))
+  });
   render();
   saveSettings();
   return true;
@@ -429,12 +433,16 @@ el.clear.onclick = () => {
 el.csv.onclick = () => {
   if (!shots.length) return toast('Nothing to export');
   const c = cfg();
-  const rows = [['n', 'timestamp', 'gap_ms', 'flight_ms', 'avg_' + el.sunit.value, 'distance_m', 'mic_m', 'temp_C', 'wind_ms']];
+  const rows = [['n', 'timestamp', 'gap_ms', 'flight_ms', 'avg_' + el.sunit.value,
+                 'distance_m', 'mic_m', 'temp_C', 'wind_ms', 'all_onsets_ms@dBFS']];
   shots.forEach((s, i) => {
     const r = solve(s.dt, c);
     rows.push([i + 1, new Date(s.t).toISOString(), (s.dt * 1000).toFixed(2),
       r ? (r.T * 1000).toFixed(2) : '', r ? toUnit(r.vAvg).toFixed(2) : '',
-      c.D.toFixed(3), c.m.toFixed(3), el.temp.value, el.wind.value]);
+      c.D.toFixed(3), c.m.toFixed(3), el.temp.value, el.wind.value,
+      '"' + (s.cands || []).map(x =>
+        `${(x.d * 1000).toFixed(1)}@${db(x.p)}${Math.abs(x.d - s.dt) < 1e-9 ? '*' : ''}`
+      ).join(' ') + '"']);
   });
   const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
   const a = document.createElement('a');

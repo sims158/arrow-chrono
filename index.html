@@ -165,7 +165,8 @@ ol .x:hover{color:var(--warn)}
 
 details summary{font-size:.875rem;font-weight:650;cursor:pointer;list-style:revert}
 .log{font-family:var(--mono);font-size:.6875rem;color:var(--ink-2);white-space:pre-wrap;
-  margin-top:.75rem;max-height:12rem;overflow:auto}
+  margin-top:.5rem;max-height:14rem;overflow:auto;background:var(--surface);
+  border:1px solid var(--line);border-radius:.375rem;padding:.625rem}
 
 .toast{position:fixed;left:50%;bottom:1.5rem;transform:translate(-50%,1rem);
   background:var(--ink);color:var(--bg);font-size:.8125rem;padding:.625rem .875rem;
@@ -314,7 +315,8 @@ details summary{font-size:.875rem;font-weight:650;cursor:pointer;list-style:reve
         </div>
       </div>
       <p class="hint">Timing offset is subtracted from the measured interval — use it to trim a systematic bias against a known-good chronograph. Drag k above 0 also reports an estimated launch speed; 0.0045 ≈ 1.2&nbsp;ft/s lost per yard.</p>
-      <div class="log" id="log"></div>
+      <p class="hint" style="margin-top:1.25rem;font-weight:650;color:var(--ink)">Detector log</p>
+      <div class="log" id="log">No shots detected yet this session. Cleared on reload.</div>
     </details>
   </section>
 </main>
