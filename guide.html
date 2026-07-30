@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arrow Chrono — Guide</title>
+<meta name="theme-color" content="#151515">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.v2.png">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#151515; --surface:#1f1f1f; --line:#3a3a3a;
+  --ink:#f0f0f0; --ink-2:#a8a8a8; --accent:#f7941d; --warn:#f08a70;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.6;
+  padding:0 max(1rem,env(safe-area-inset-left)) calc(3rem + env(safe-area-inset-bottom));
+  -webkit-text-size-adjust:100%}
+main{max-width:34rem;margin:0 auto}
+header{padding:1.25rem 0 1rem;border-bottom:1px solid var(--line);
+  display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+h1{font-size:1.0625rem;font-weight:650;margin:0}
+h1 span{color:var(--ink-2);font-weight:450}
+.back{font-family:var(--mono);font-size:.75rem;color:var(--accent);text-decoration:none;
+  border:1px solid var(--line);padding:.3rem .55rem;border-radius:.3rem;white-space:nowrap}
+.back:hover{border-color:var(--accent)}
+
+nav{margin:1.25rem 0 .5rem;padding:.875rem 1rem;background:var(--surface);
+  border:1px solid var(--line);border-radius:.5rem}
+nav p{margin:0 0 .5rem;font-size:.75rem;font-weight:650;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-2)}
+nav ol{margin:0;padding-left:1.1rem;font-size:.875rem}
+nav li{margin:.2rem 0}
+nav a{color:var(--ink);text-decoration:none}
+nav a:hover{color:var(--accent)}
+
+h2{font-size:1.125rem;font-weight:650;margin:2.25rem 0 .75rem;
+  padding-top:1.25rem;border-top:1px solid var(--line)}
+h3{font-size:.9375rem;font-weight:650;margin:1.5rem 0 .5rem;color:var(--accent)}
+p{margin:0 0 .875rem}
+ul,ol.steps{margin:0 0 .875rem;padding-left:1.25rem}
+li{margin:.3rem 0}
+strong{font-weight:650}
+code{font-family:var(--mono);font-size:.8125em;background:var(--surface);
+  border:1px solid var(--line);border-radius:.25rem;padding:.08em .3em;color:var(--accent)}
+pre{font-family:var(--mono);font-size:.75rem;background:var(--surface);
+  border:1px solid var(--line);border-radius:.375rem;padding:.75rem .875rem;
+  overflow-x:auto;margin:0 0 .875rem;color:var(--ink)}
+table{width:100%;border-collapse:collapse;margin:0 0 .875rem;font-size:.875rem}
+th,td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2);font-weight:650}
+td.num{font-family:var(--mono);white-space:nowrap}
+.callout{background:var(--surface);border-left:3px solid var(--accent);
+  border-radius:0 .375rem .375rem 0;padding:.75rem .875rem;margin:0 0 .875rem}
+.callout p:last-child{margin:0}
+.callout.warn{border-left-color:var(--warn)}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);
+  font-size:.8125rem;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Arrow Chrono <span>guide</span></h1>
+    <a class="back" href="./">&larr; App</a>
+  </header>
+
+  <nav>
+    <p>Contents</p>
+    <ol>
+      <li><a href="#what">What it measures</a></li>
+      <li><a href="#start">Quick start</a></li>
+      <li><a href="#distance">Setting the distance</a></li>
+      <li><a href="#phone">Where to put the phone</a></li>
+      <li><a href="#reading">Reading the numbers</a></li>
+      <li><a href="#chrono">Comparing with a real chronograph</a></li>
+      <li><a href="#settings">What each setting does</a></li>
+      <li><a href="#trouble">When it goes wrong</a></li>
+      <li><a href="#data">Exporting data</a></li>
+      <li><a href="#experiments">Things worth measuring</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="what">1. What it measures</h2>
+  <p>The app listens for two sounds — the shot and the arrow hitting the target. It times the gap between them, subtracts however long the sound took to travel back to the phone, and divides your distance by the remaining flight time.</p>
+  <div class="callout">
+    <p><strong>It reports average speed over the flight, not the speed leaving the bow.</strong> An arrow is decelerating the whole way, so this reading will always sit below what a bow-mounted chronograph shows. That is correct behaviour, not an error — see section 6 for how much to expect.</p>
+  </div>
+  <p>Timing is taken from the audio sample clock, giving roughly 21 microseconds of resolution. That is around 0.01% of a typical flight time, so timing is never the weak link. <strong>Your distance measurement is.</strong> A 1% error in distance is about a 1.2% error in speed.</p>
+
+  <h2 id="start">2. Quick start</h2>
+  <ol class="steps">
+    <li>Measure from the shooting line to the target face, as accurately as you can.</li>
+    <li>Enter that in <strong>Distance to target</strong> and pick metres or yards.</li>
+    <li>Choose <strong>Phone position</strong> — start with <em>At the bow</em>.</li>
+    <li>Set the air temperature roughly. It only matters for <em>At the bow</em>.</li>
+    <li>Prop the phone up, tap <strong>Start listening</strong>, and shoot.</li>
+  </ol>
+  <p>The mic switches itself off once a shot is recorded, and the button becomes <em>Listen for next shot</em>. One arrow per arm — that is intentional, so the app is not sitting there listening between ends.</p>
+
+  <h2 id="distance">3. Setting the distance</h2>
+  <div class="callout warn">
+    <p><strong>Always bow to target.</strong> The full flight path, regardless of where the phone is. Never phone to target. The phone's position is handled entirely by the <em>Phone position</em> setting.</p>
+  </div>
+  <p>This catches people out on the Midway setting, where the maths reduces to distance divided by the measured gap. Speed there is <strong>directly proportional to the number you type in</strong> — enter half the distance and you get half the speed.</p>
+
+  <h2 id="phone">4. Where to put the phone</h2>
+  <p>Sound from the impact has to travel back to the microphone, and that delay has to be removed. How much depends on where the phone sits.</p>
+
+  <h3>At the bow</h3>
+  <p>Simplest. The app subtracts the full return trip, which it works out from the air temperature — so a wrong temperature means a wrong reading. At 18 m that correction is around 53 ms out of a 268 ms gap, so it is not a small term.</p>
+
+  <h3>Midway — the accurate one</h3>
+  <p>With the phone exactly halfway, the outbound and return sound paths are identical and cancel completely. The correction becomes zero and <strong>air temperature stops mattering at all</strong>. You can watch this happen: the hint under the buttons shows the live correction in milliseconds, and it drops to <code>0.0 ms</code>.</p>
+
+  <div class="callout">
+    <p><strong>Move the phone off the shooting line.</strong> Stay level with the midpoint but step 3–5 m to the side.</p>
+    <p>The cancellation needs the phone <em>equidistant</em> from bow and target — not on the line between them. Offset sideways and both paths are still equal, so it still works perfectly. But the arrow now passes several metres away instead of straight past the microphone, which is the single biggest cause of bad midway readings.</p>
+  </div>
+
+  <h3>Custom</h3>
+  <p>Any other position, measured from the bow toward the target, in the same unit as your distance.</p>
+
+  <h2 id="reading">5. Reading the numbers</h2>
+  <table>
+    <tr><th>Field</th><th>Meaning</th></tr>
+    <tr><td>Big figure</td><td>Average speed of the last shot</td></tr>
+    <tr><td>AVG</td><td>Mean across the session</td></tr>
+    <tr><td>STD DEV</td><td>Spread — see below</td></tr>
+    <tr><td>MAX</td><td>Fastest recorded</td></tr>
+    <tr><td>flight</td><td>Corrected flight time</td></tr>
+    <tr><td>gap</td><td>Raw measured interval between the two sounds</td></tr>
+  </table>
+  <div class="callout">
+    <p><strong>Standard deviation is the number to watch.</strong> It tells you whether the method is behaving, separately from your shooting. Under about 1–2 ft/s means the detector is finding real, consistent events. A wild spread usually means it is latching onto echoes or the arrow passing, not that your bow is inconsistent.</p>
+  </div>
+  <p>If a reading looks wrong, the chips underneath show the other candidate sounds it heard. Tap one to reassign the shot to it.</p>
+
+  <h2 id="chrono">6. Comparing with a real chronograph</h2>
+  <p>A bow-mounted chronograph reads speed at the bow. This app reads the average over the whole flight. The gap between them is real deceleration and grows with distance and with speed.</p>
+  <table>
+    <tr><th>Distance</th><th>Expect the app to read</th></tr>
+    <tr><td class="num">6 m</td><td>about 1.3% below</td></tr>
+    <tr><td class="num">10 m</td><td>about 2.2% below</td></tr>
+    <tr><td class="num">18 m</td><td>about 4.0% below</td></tr>
+    <tr><td class="num">27 m</td><td>about 5.9% below</td></tr>
+  </table>
+  <p>Those are for a fairly light target arrow. Heavier arrows lose proportionally less. A worked example: a 195 ft/s bow measured at 6 m should read about 192.4 — an actual test came in at 192.1.</p>
+  <p>To recover launch speed, put a drag coefficient in <strong>Arrow drag k</strong> (Advanced). Around <code>0.005</code> suits a light arrow, <code>0.0045</code> a mid-weight one. The app then shows an estimated launch figure next to the average.</p>
+
+  <h2 id="settings">7. What each setting does</h2>
+  <table>
+    <tr><th>Setting</th><th>Changes the speed?</th></tr>
+    <tr><td>Arrow weight</td><td>No — adds a kinetic energy readout only</td></tr>
+    <tr><td>Speed unit</td><td>No — display only</td></tr>
+    <tr><td>Trigger sensitivity</td><td>No — affects whether shots register at all</td></tr>
+    <tr><td>High-pass filter</td><td>No — same, filters out wind rumble</td></tr>
+    <tr><td>Slowest / fastest plausible</td><td>Indirectly — sets which sounds are eligible</td></tr>
+    <tr><td>Timing offset</td><td><strong>Yes</strong> — defaults to 0, leave it there unless calibrating</td></tr>
+    <tr><td>Arrow drag k</td><td>No — adds a separate launch estimate</td></tr>
+  </table>
+
+  <h2 id="trouble">8. When it goes wrong</h2>
+
+  <h3>Nothing is detected</h3>
+  <ul>
+    <li>Lower the <strong>trigger sensitivity</strong> number (it is a multiple of the noise floor — 8 is default, try 5).</li>
+    <li>Foam targets are quiet. A bag or block target is much easier to hear.</li>
+    <li>Compound bows are quieter at the shot than recurves; they often need lower sensitivity.</li>
+    <li>Watch the level meter — the tick mark is the trigger threshold.</li>
+  </ul>
+
+  <h3>It triggers on everything</h3>
+  <ul>
+    <li>Raise the sensitivity number, or raise the high-pass frequency to cut wind.</li>
+    <li>Narrow <strong>slowest / fastest plausible</strong> to bracket your actual speed. If you shoot around 85 m/s, setting 60 and 120 excludes a lot of rubbish.</li>
+  </ul>
+
+  <h3>The reading is wildly wrong</h3>
+  <p>The ratio against a known-good figure identifies the cause. These hold at any distance.</p>
+  <table>
+    <tr><th>Reading is</th><th>Cause</th></tr>
+    <tr><td class="num">~2.4x</td><td>Arrow passing the phone was taken as the impact</td></tr>
+    <tr><td class="num">~1.7x</td><td>Arrow passing was taken as the shot</td></tr>
+    <tr><td class="num">~1.2x</td><td>Set to <em>At the bow</em> but the phone was at the midpoint</td></tr>
+    <tr><td class="num">~0.85x</td><td>Set to <em>Midway</em> but the phone was at the bow</td></tr>
+    <tr><td class="num">half</td><td>Entered phone-to-target instead of bow-to-target</td></tr>
+  </table>
+  <p>The first two are why short distances are hard: at 6 m everything happens within about 100 ms and the events crowd together. <strong>15–20 m is far easier</strong> than 6 m.</p>
+
+  <h2 id="data">9. Exporting data</h2>
+  <p><strong>Export CSV</strong> gives one row per shot with the gap, flight time, speed and your settings. The final column lists <em>every</em> sound it detected, as <code>gap@level</code>, with <code>*</code> marking the one chosen as the impact.</p>
+  <pre>42.4@-10* 102.5@-18</pre>
+  <p>That example is the classic failure: two events, the app picked the louder one at 42 ms, and the real impact at 102.5 ms was ignored. If readings look odd, that column tells you exactly what the phone heard.</p>
+  <p>There is also a live <strong>Detector log</strong> at the bottom of Advanced. It clears on reload.</p>
+
+  <h2 id="experiments">10. Things worth measuring</h2>
+
+  <h3>Your arrow's real drag</h3>
+  <p>Shoot the same setup at two distances — say 10 m and 25 m. The difference in average speed gives your actual <code>k</code> rather than an assumed one, after which launch speed becomes measured instead of estimated.</p>
+
+  <h3>Brace height</h3>
+  <p>Normally tuned by feel and noise. Now you can price it. Roughly 1.3 ft/s per quarter inch — small, so shoot ten arrows per setting and compare the means. Watch the standard deviation to know whether a difference is real or noise.</p>
+
+  <h3>Comparing bows fairly</h3>
+  <ul>
+    <li>Shoot everyone at the <strong>same distance</strong>, or the drag correction differs and the comparison is meaningless.</li>
+    <li>Record arrow weight and draw weight for each.</li>
+    <li>Speed alone flatters light arrows. Kinetic energy flatters heavy fast ones.</li>
+    <li><strong>Energy per pound of draw weight</strong> is the interesting one — it measures how well the bow converts what the archer puts in, and it is where a modest recurve can surprise people.</li>
+  </ul>
+  <pre>KE (ft-lb)  = grains x fps^2 / 450240
+momentum    = grains x fps / 225218</pre>
+
+  <footer>
+    Arrow Chrono — acoustic chronograph. Works offline once installed.
+    <a class="back" style="border:0;padding:0" href="./">Back to the app &rarr;</a>
+  </footer>
+</main>
+</body>
+</html>
